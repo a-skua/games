@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"image/color"
 	"log"
 
@@ -9,7 +10,6 @@ import (
 )
 
 const (
-	title        = "West"
 	screenWidth  = 256
 	screenHeight = 256
 
@@ -73,7 +73,7 @@ func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
 
 func main() {
 	ebiten.SetWindowSize(screenWidth*2, screenHeight*2)
-	ebiten.SetWindowTitle(title)
+	ebiten.SetWindowTitle(fmt.Sprintf("%s (v%s)", title, version))
 	game := &Game{
 		x:         screenWidth / 2, // 画面中央からスタート
 		direction: 1,               // 最初は右へ
