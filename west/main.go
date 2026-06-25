@@ -2,9 +2,9 @@ package main
 
 import (
 	"fmt"
-	"image/color"
 	"log"
 
+	"github.com/a-skua/games/west/internal/color"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/vector"
 )
@@ -22,17 +22,17 @@ const (
 	fireInterval = 6 // 連射間隔 (フレーム数。小さいほど高速連射)
 )
 
-var (
-	gray = color.RGBA{0x0a, 0x0a, 0x0a, 0xff}
-)
-
 // bullet は自機から発射される弾を表す。x, y は長方形の中心座標。
 type bullet struct {
 	x, y float32
 }
 
+type player struct {
+	x, y float32
+}
+
 type Game struct {
-	x           float32  // 白い点(自機)のX座標
+	player      player   // 自機の位置
 	direction   float32  // 移動方向 (+1: 右, -1: 左)
 	prevPressed bool     // 前フレームで押されていたか
 	bullets     []bullet // 飛んでいる弾
@@ -59,13 +59,13 @@ func (g *Game) Update() error {
 
 	// 押している間だけ現在の方向へ動かす
 	if cur {
-		g.x += g.direction * dotSpeed
+		g.player.x += g.direction * dotSpeed
 		// 画面内に収める
-		if g.x < dotRadius {
-			g.x = dotRadius
+		if g.player.x < dotRadius {
+			g.player.x = dotRadius
 		}
-		if g.x > screenWidth-dotRadius {
-			g.x = screenWidth - dotRadius
+		if g.player.x > screenWidth-dotRadius {
+			g.player.x = screenWidth - dotRadius
 		}
 	}
 
@@ -79,7 +79,7 @@ func (g *Game) Update() error {
 	// fireInterval フレームに 1 発、自機の位置から発射する。
 	g.fireCount--
 	if g.fireCount <= 0 {
-		g.bullets = append(g.bullets, bullet{x: g.x, y: screenHeight / 2})
+		g.bullets = append(g.bullets, bullet{x: g.player.x, y: g.player.y})
 		g.fireCount = fireInterval
 	}
 
@@ -99,23 +99,23 @@ func (g *Game) Update() error {
 
 func (g *Game) Draw(screen *ebiten.Image) {
 	// 背景を明示的に黒で塗りつぶす。
-	screen.Fill(gray)
+	screen.Fill(color.BackgroundA)
 
 	// 自機(白い点)を境界に、進行方向側の背景をグレーで塗る。
 	// (右へ進行中なら右側、左へ進行中なら左側がグレー)
 	if g.direction > 0 {
-		vector.DrawFilledRect(screen, g.x, 0, screenWidth-g.x, screenHeight, color.Black, false)
+		vector.FillRect(screen, g.player.x, 0, screenWidth-g.player.x, screenHeight, color.BackgroundB, false)
 	} else {
-		vector.DrawFilledRect(screen, 0, 0, g.x, screenHeight, color.Black, false)
+		vector.FillRect(screen, 0, 0, g.player.x, screenHeight, color.BackgroundB, false)
 	}
 
 	// 飛んでいる弾(長方形)を描画する。x, y を中心とするので左上に補正する。
 	for _, b := range g.bullets {
-		vector.DrawFilledRect(screen, b.x-bulletWidth/2, b.y-bulletHeight/2, bulletWidth, bulletHeight, color.White, true)
+		vector.DrawFilledRect(screen, b.x-bulletWidth/2, b.y-bulletHeight/2, bulletWidth, bulletHeight, color.Bullet, true)
 	}
 
-	// 白い点を画面中央の高さに表示する
-	vector.FillCircle(screen, g.x, screenHeight/2, dotRadius, color.White, true)
+	// 白い点を player.y の高さに表示する
+	vector.FillCircle(screen, g.player.x, g.player.y, dotRadius, color.Player, true)
 }
 
 func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
@@ -126,8 +126,11 @@ func main() {
 	ebiten.SetWindowSize(screenWidth*2, screenHeight*2)
 	ebiten.SetWindowTitle(fmt.Sprintf("%s (v%s)", title, version))
 	game := &Game{
-		x:         screenWidth / 2, // 画面中央からスタート
-		direction: 1,               // 最初は右へ
+		player: player{
+			x: screenWidth / 2, // 画面中央からスタート
+			y: screenHeight * 0.9,
+		},
+		direction: 1, // 最初は右へ
 	}
 	if err := ebiten.RunGame(game); err != nil {
 		log.Fatal(err)
