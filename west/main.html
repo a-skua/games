@@ -12,34 +12,22 @@
         margin: 0;
         height: 100%;
         background: #fff;
-        /* タップでのスクロール・ズーム・選択を抑止して弾幕操作に集中させる */
         overflow: hidden;
-        touch-action: none;
-        -webkit-user-select: none;
-        user-select: none;
       }
-      canvas {
+      iframe {
         display: block;
         margin: 0 auto;
-        /* 最大512px。画面がそれより狭ければ画面幅いっぱい(100vw)に。
-           ebitenがcanvasのサイズをインラインstyleで直接指定するため、
-           こちらのCSSを勝たせるには !important が必要。 */
-        width: 100vw !important;
-        max-width: 512px !important;
-        height: auto !important;
+        border: none;
+        /* 最大512px。画面がそれより狭ければ画面幅いっぱい(100vw)に。 */
+        width: 100vw;
+        max-width: 512px;
+        /* 縦幅も同様に最大512pxで頭打ちにし、それより狭ければ画面幅基準(100vw)に。 */
+        height: 100vw;
+        max-height: 512px;
       }
     </style>
-    <script src="wasm_exec.js"></script>
-    <script type="module">
-      const go = new Go();
-      const wasm = new URL("west.wasm", import.meta.url);
-
-      const { instance } = await WebAssembly.instantiateStreaming(
-        fetch(wasm),
-        go.importObject,
-      );
-      go.run(instance);
-    </script>
   </head>
-  <body></body>
+  <body>
+    <iframe src="game.html"></iframe>
+  </body>
 </html>

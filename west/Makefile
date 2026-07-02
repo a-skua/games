@@ -17,7 +17,7 @@ fmt:
 	@deno fmt .
 
 .PHONY: build
-build: $(DIST_DIR)/index.html $(DIST_DIR)/west.wasm $(DIST_DIR)/wasm_exec.js
+build: $(DIST_DIR)/index.html $(DIST_DIR)/game.html $(DIST_DIR)/west.wasm $(DIST_DIR)/wasm_exec.js
 
 .PHONY: clean
 clean:
@@ -27,6 +27,10 @@ $(DIST_DIR)/wasm_exec.js:
 	cp $(shell go env GOROOT)/lib/wasm/wasm_exec.js $@
 
 $(DIST_DIR)/index.html: main.html
+	@mkdir -p $(DIST_DIR)
+	cp $< $@
+
+$(DIST_DIR)/game.html: game.html
 	@mkdir -p $(DIST_DIR)
 	cp $< $@
 

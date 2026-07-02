@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <style>
+      html,
+      body {
+        margin: 0;
+        height: 100%;
+        background: #fff;
+        /* タップでのスクロール・ズーム・選択を抑止して弾幕操作に集中させる */
+        overflow: hidden;
+        touch-action: none;
+        -webkit-user-select: none;
+        user-select: none;
+      }
+      canvas {
+        display: block;
+        margin: 0 auto;
+        /* ebitenがcanvasのサイズをインラインstyleで直接指定するため、
+           こちらのCSSを勝たせるには !important が必要。
+           横幅はこのiframe自体の大きさ(親ページ側で制御)に合わせ、
+           高さはcanvasの内部解像度に応じてauto追従させる。 */
+        width: 100% !important;
+        height: auto !important;
+      }
+    </style>
+    <script src="wasm_exec.js"></script>
+    <script type="module">
+      const go = new Go();
+      const wasm = new URL("west.wasm", import.meta.url);
+
+      const { instance } = await WebAssembly.instantiateStreaming(
+        fetch(wasm),
+        go.importObject,
+      );
+      go.run(instance);
+    </script>
+  </head>
+  <body></body>
+</html>
