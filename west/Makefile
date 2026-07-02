@@ -3,13 +3,15 @@ DIST_DIR := dist
 WASM_SRC := $(shell find . -name '*.go')
 BUILD_FLAGS := -s -w -X main.version=$(VERSION)
 
+PORT ?= 8080
+
 .PHONY: run
 run:
 	@go run -tags=ebitenginedebug -ldflags "$(BUILD_FLAGS)" .
 
 .PHONY: start
 start: build
-	@deno run -NR=$(DIST_DIR) jsr:@std/http/file-server $(DIST_DIR)
+	@deno run -NR=$(DIST_DIR) jsr:@std/http/file-server $(DIST_DIR) -p=$(PORT)
 
 .PHONY: fmt
 fmt:
